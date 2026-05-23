@@ -6,7 +6,7 @@ class WSClient {
   private url: string
 
   constructor(url?: string) {
-    this.url = url || process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080/ws'
+    this.url = url || process.env.NEXT_PUBLIC_WS_URL || ''
   }
 
   connect(token: string) {

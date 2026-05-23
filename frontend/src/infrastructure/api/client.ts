@@ -2,8 +2,8 @@ export class ApiClient {
   private baseUrl: string
   private token: string | null = null
 
-  constructor(baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080') {
-    this.baseUrl = baseUrl
+  constructor(baseUrl?: string) {
+    this.baseUrl = baseUrl || process.env.NEXT_PUBLIC_API_URL || ''
   }
 
   setToken(t: string | null) { this.token = t }

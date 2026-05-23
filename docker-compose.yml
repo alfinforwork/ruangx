@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ruangx
+      POSTGRES_PASSWORD: ruangx
+      POSTGRES_DB: ruangx
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  api-gateway:
+    build: ./backend/api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - kafka
+    env_file: ./backend/.env
+
+  auth-service:
+    build: ./backend/auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - kafka
+    env_file: ./backend/.env
+
+  post-service:
+    build: ./backend/post-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+      - kafka
+    env_file: ./backend/.env
+
+  chat-service:
+    build: ./backend/chat-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+    env_file: ./backend/.env
+
+  notification-service:
+    build: ./backend/notification-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - kafka
+    env_file: ./backend/.env
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+    env_file: ./frontend/.env.local
+
+volumes:
+  pgdata:

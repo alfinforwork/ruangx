@@ -1,0 +1,36 @@
+# Node
+node_modules/
+.next/
+*.log
+.env.local
+.env.production
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+*.test
+*.out
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+
+# Misc
+.env
+*.pem
+dist/
+tmp/

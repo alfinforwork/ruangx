@@ -1,4 +1,4 @@
-module github.com/ruangx/chat-service
+module github.com/ruangx/api-gateway
 
 go 1.25.0
 

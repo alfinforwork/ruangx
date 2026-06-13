@@ -80,16 +80,18 @@ func (r *RoomRepository) FindPopular(ctx context.Context, cursor string, limit i
 	}
 
 	sql := `SELECT id, name, description, icon, banner_url, color, created_by, member_count, post_count, is_private, is_nsfw, created_at, updated_at
-		FROM rooms`
+		FROM rooms WHERE 1=1`
 	args := []interface{}{}
+	paramIdx := 1
 
 	if cursor != "" {
-		sql += " WHERE id > $1"
+		sql += fmt.Sprintf(" AND id > $%d", paramIdx)
 		args = append(args, cursor)
+		paramIdx++
 	}
 
+	sql += fmt.Sprintf(" ORDER BY member_count DESC LIMIT $%d", paramIdx)
 	args = append(args, limit+1)
-	sql += " ORDER BY member_count DESC LIMIT $2"
 
 	rows, err := r.pool.Query(ctx, sql, args...)
 	if err != nil {

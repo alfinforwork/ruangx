@@ -1,0 +1,1 @@
+import{f as e}from"./index-BiXwOB6p.js";const a={list:s=>e("/posts",{params:s}),get:s=>e(`/posts/${s}`),create:s=>e("/posts",{method:"POST",body:s}),delete:s=>e(`/posts/${s}`,{method:"DELETE"}),getThread:s=>e(`/posts/${s}/thread`),getFeed:(s,t)=>e("/feed",{params:{type:s,cursor:t}}),getByUser:(s,t,o)=>e(`/users/${s}/posts`,{params:{type:t,cursor:o}})};export{a as p};

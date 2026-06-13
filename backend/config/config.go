@@ -30,7 +30,7 @@ type Config struct {
 	S3Region    string `env:"S3_REGION" envDefault:"us-east-1"`
 	S3UseSSL    string `env:"S3_USE_SSL" envDefault:"false"`
 
-	AllowedOrigins string `env:"ALLOWED_ORIGINS" envDefault:"http://localhost:3000"`
+	AllowedOrigins string `env:"ALLOWED_ORIGINS" envDefault:"*"`
 }
 
 func Load() (*Config, error) {

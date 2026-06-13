@@ -27,13 +27,19 @@ func Auth(jwtSvc *jwt.JWTService) fiber.Handler {
 		}
 
 		c.Locals("user_id", claims.UserID)
+		c.Context().SetUserValue("user_id", claims.UserID)
 		return c.Next()
 	}
 }
 
 func GetUserID(c fiber.Ctx) string {
-	if userID, ok := c.Locals("user_id").(string); ok {
+	if userID, ok := c.Locals("user_id").(string); ok && userID != "" {
 		return userID
+	}
+	if userID := c.Context().UserValue("user_id"); userID != nil {
+		if s, ok := userID.(string); ok && s != "" {
+			return s
+		}
 	}
 	return ""
 }
@@ -53,6 +59,7 @@ func OptionalAuth(jwtSvc *jwt.JWTService) fiber.Handler {
 		claims, err := jwtSvc.ValidateToken(parts[1])
 		if err == nil {
 			c.Locals("user_id", claims.UserID)
+			c.Context().SetUserValue("user_id", claims.UserID)
 		}
 
 		return c.Next()

@@ -1,0 +1,1 @@
+import{j as o}from"./index-BiXwOB6p.js";import{L as r,G as t}from"./auth-guard-cphU_3bp.js";import"./button-BVF8wrd4.js";import"./input-FQSj5ddQ.js";import"./card-BPuUlXUK.js";function n(){return o.jsx(r,{})}function u(){return o.jsx(t,{children:o.jsx(n,{})})}export{u as component};

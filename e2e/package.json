@@ -1,0 +1,20 @@
+{
+  "name": "ruangx-e2e",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:auth": "playwright test tests/auth.spec.ts",
+    "test:posts": "playwright test tests/posts.spec.ts",
+    "test:feed": "playwright test tests/feed.spec.ts",
+    "test:social": "playwright test tests/social.spec.ts",
+    "test:messages": "playwright test tests/messages.spec.ts",
+    "test:rooms": "playwright test tests/rooms.spec.ts",
+    "test:users": "playwright test tests/users.spec.ts",
+    "test:api": "playwright test --grep 'API$'",
+    "test:ui": "playwright test --grep 'UI'"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

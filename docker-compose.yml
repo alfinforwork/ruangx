@@ -73,7 +73,7 @@ services:
       S3_BUCKET: ruangx-media
       S3_REGION: us-east-1
       S3_USE_SSL: "false"
-      ALLOWED_ORIGINS: http://localhost:3000
+      ALLOWED_ORIGINS: "*"  # allow all during dev; change to specific origins in production
     depends_on:
       postgres:
         condition: service_healthy
@@ -89,12 +89,14 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: https://ruangx-api-dev.alfin.top/api/v1
     container_name: ruangx-web
     ports:
       - "3000:3000"
     environment:
-      VITE_API_URL: http://localhost:8080
-      VITE_WS_URL: ws://localhost:8080
+      VITE_API_URL: https://ruangx-api-dev.alfin.top/api/v1
+      VITE_WS_URL: wss://ruangx-api-dev.alfin.top
     volumes:
       - ./frontend:/app
       - /app/node_modules

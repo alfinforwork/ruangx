@@ -90,9 +90,17 @@ func (uc *UseCase) Register(ctx context.Context, req dto.RegisterRequest) (*dto.
 }
 
 func (uc *UseCase) Login(ctx context.Context, req dto.LoginRequest) (*dto.AuthResponse, error) {
-	u, err := uc.userRepo.FindByUsername(ctx, req.Username)
+	// Try find by username first, then email
+	u, err := uc.userRepo.FindByUsername(ctx, req.Identifier)
 	if err != nil {
 		return nil, apperrors.ErrInternal
+	}
+	if u == nil {
+		// Try by email
+		u, err = uc.userRepo.FindByEmail(ctx, req.Identifier)
+		if err != nil {
+			return nil, apperrors.ErrInternal
+		}
 	}
 	if u == nil {
 		return nil, apperrors.NewAppError(401, "Invalid username or password")

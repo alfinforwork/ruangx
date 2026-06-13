@@ -1,0 +1,1 @@
+import{j as o}from"./index-BiXwOB6p.js";import{R as t}from"./room-page-gkJCGIbX.js";import"./avatar-CgG6nPfr.js";import"./button-BVF8wrd4.js";import"./badge-BUTkN92H.js";import"./skeleton-Bq-EBu3A.js";import"./separator-CR-pIVv5.js";import"./use-room-okR4VuIz.js";import"./chevron-left-CG8fJBAs.js";function m(){return o.jsx(t,{})}const x=m;export{x as component};

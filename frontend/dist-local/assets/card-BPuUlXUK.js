@@ -1,0 +1,1 @@
+import{j as a,i as n}from"./index-BiXwOB6p.js";function c({hover:r=!1,className:s,children:e,...o}){return a.jsx("div",{className:n("rounded-2xl border border-surface-800 bg-surface-900 p-4",r&&"transition-colors hover:bg-surface-850",s),...o,children:e})}export{c as C};

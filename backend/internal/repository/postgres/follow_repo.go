@@ -78,14 +78,16 @@ func (r *FollowRepository) GetFollowers(ctx context.Context, userID string, curs
 		FROM follows f WHERE f.following_id = $1`
 
 	args := []interface{}{userID}
+	paramIdx := 2
 
 	if cursor != "" {
-		sql += " AND (f.created_at, f.id) < (SELECT created_at, id FROM follows WHERE id = $2)"
+		sql += fmt.Sprintf(" AND (f.created_at, f.id) < (SELECT created_at, id FROM follows WHERE id = $%d)", paramIdx)
 		args = append(args, cursor)
+		paramIdx++
 	}
 
+	sql += fmt.Sprintf(" ORDER BY f.created_at DESC LIMIT $%d", paramIdx)
 	args = append(args, limit+1)
-	sql += " ORDER BY f.created_at DESC LIMIT $3"
 
 	rows, err := r.pool.Query(ctx, sql, args...)
 	if err != nil {
@@ -121,14 +123,16 @@ func (r *FollowRepository) GetFollowing(ctx context.Context, userID string, curs
 		FROM follows f WHERE f.follower_id = $1`
 
 	args := []interface{}{userID}
+	paramIdx := 2
 
 	if cursor != "" {
-		sql += " AND (f.created_at, f.id) < (SELECT created_at, id FROM follows WHERE id = $2)"
+		sql += fmt.Sprintf(" AND (f.created_at, f.id) < (SELECT created_at, id FROM follows WHERE id = $%d)", paramIdx)
 		args = append(args, cursor)
+		paramIdx++
 	}
 
+	sql += fmt.Sprintf(" ORDER BY f.created_at DESC LIMIT $%d", paramIdx)
 	args = append(args, limit+1)
-	sql += " ORDER BY f.created_at DESC LIMIT $3"
 
 	rows, err := r.pool.Query(ctx, sql, args...)
 	if err != nil {

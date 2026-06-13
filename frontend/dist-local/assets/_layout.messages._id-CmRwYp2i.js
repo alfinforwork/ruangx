@@ -1,0 +1,1 @@
+import{j as o}from"./index-BiXwOB6p.js";import{a as t}from"./message-page-itA0hNnn.js";import"./avatar-CgG6nPfr.js";import"./button-BVF8wrd4.js";import"./skeleton-Bq-EBu3A.js";import"./id-9dshsVuX.js";import"./chevron-left-CG8fJBAs.js";function r(){return o.jsx(t,{})}const u=r;export{u as component};

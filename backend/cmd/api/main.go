@@ -15,6 +15,9 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/alfinokio/ruangx/config"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4"
 	authHandler "github.com/alfinokio/ruangx/internal/handler/auth"
 	bookmarkHandler "github.com/alfinokio/ruangx/internal/handler/bookmark"
 	followHandler "github.com/alfinokio/ruangx/internal/handler/follow"
@@ -60,6 +63,18 @@ func init() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 }
 
+func runMigrations(dsn string) error {
+	m, err := migrate.New("file://migrations", dsn)
+	if err != nil {
+		return fmt.Errorf("migrate init: %w", err)
+	}
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return fmt.Errorf("migrate up: %w", err)
+	}
+	log.Info().Msg("Migrations applied successfully")
+	return nil
+}
+
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
@@ -84,6 +99,11 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to connect to database")
 	}
 	defer pool.Close()
+
+	// Auto-migrate database
+	if err := runMigrations(dsn); err != nil {
+		log.Warn().Err(err).Msg("Migration warning (continuing anyway)")
+	}
 
 	db := 0
 	redisAddr := cfg.RedisHost
@@ -181,6 +201,8 @@ func main() {
 	})
 
 	authMw := middleware.Auth(jwtSvc)
+
+	
 
 	setupRoutes(app, authMw, authH, postH, userH, likeH, bookmarkH, followH, roomH, hashtagH, notifH, msgH, trendH, uploadH, timelineH)
 

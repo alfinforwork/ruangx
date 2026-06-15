@@ -64,8 +64,8 @@ export interface Room {
   isPrivate: boolean
   isJoined: boolean
   createdAt: string
-  owner: User
-  moderators: User[]
+  owner?: User
+  moderators?: User[]
 }
 
 export interface Hashtag {

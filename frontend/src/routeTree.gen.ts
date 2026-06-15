@@ -17,6 +17,7 @@ import { Route as LayoutRoomsRouteImport } from './app/routes/_layout.rooms'
 import { Route as LayoutNotificationsRouteImport } from './app/routes/_layout.notifications'
 import { Route as LayoutMessagesRouteImport } from './app/routes/_layout.messages'
 import { Route as LayoutExploreRouteImport } from './app/routes/_layout.explore'
+import { Route as LayoutBookmarksRouteImport } from './app/routes/_layout.bookmarks'
 import { Route as authRegisterRouteImport } from './app/routes/(auth).register'
 import { Route as authLoginRouteImport } from './app/routes/(auth).login'
 import { Route as LayoutRoomsIdRouteImport } from './app/routes/_layout.rooms.$id'
@@ -64,6 +65,11 @@ const LayoutExploreRoute = LayoutExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutBookmarksRoute = LayoutBookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const authRegisterRoute = authRegisterRouteImport.update({
   id: '/(auth)/register',
   path: '/register',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/bookmarks': typeof LayoutBookmarksRoute
   '/explore': typeof LayoutExploreRoute
   '/messages': typeof LayoutMessagesRouteWithChildren
   '/notifications': typeof LayoutNotificationsRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/bookmarks': typeof LayoutBookmarksRoute
   '/explore': typeof LayoutExploreRoute
   '/messages': typeof LayoutMessagesRouteWithChildren
   '/notifications': typeof LayoutNotificationsRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/_layout': typeof LayoutRouteWithChildren
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
+  '/_layout/bookmarks': typeof LayoutBookmarksRoute
   '/_layout/explore': typeof LayoutExploreRoute
   '/_layout/messages': typeof LayoutMessagesRouteWithChildren
   '/_layout/notifications': typeof LayoutNotificationsRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/bookmarks'
     | '/explore'
     | '/messages'
     | '/notifications'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/register'
+    | '/bookmarks'
     | '/explore'
     | '/messages'
     | '/notifications'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/_layout'
     | '/(auth)/login'
     | '/(auth)/register'
+    | '/_layout/bookmarks'
     | '/_layout/explore'
     | '/_layout/messages'
     | '/_layout/notifications'
@@ -264,6 +276,13 @@ declare module '@tanstack/react-router' {
       path: '/explore'
       fullPath: '/explore'
       preLoaderRoute: typeof LayoutExploreRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/bookmarks': {
+      id: '/_layout/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof LayoutBookmarksRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/(auth)/register': {
@@ -343,6 +362,7 @@ const LayoutRoomsRouteWithChildren = LayoutRoomsRoute._addFileChildren(
 )
 
 interface LayoutRouteChildren {
+  LayoutBookmarksRoute: typeof LayoutBookmarksRoute
   LayoutExploreRoute: typeof LayoutExploreRoute
   LayoutMessagesRoute: typeof LayoutMessagesRouteWithChildren
   LayoutNotificationsRoute: typeof LayoutNotificationsRoute
@@ -356,6 +376,7 @@ interface LayoutRouteChildren {
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutBookmarksRoute: LayoutBookmarksRoute,
   LayoutExploreRoute: LayoutExploreRoute,
   LayoutMessagesRoute: LayoutMessagesRouteWithChildren,
   LayoutNotificationsRoute: LayoutNotificationsRoute,

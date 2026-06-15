@@ -1,140 +1,110 @@
-import { useParams, Link } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useParams, useNavigate } from '@tanstack/react-router'
 import { useUser, useUserPosts } from '@/hooks/user/use-user'
 import { useAuthStore } from '@/stores/auth'
 import { Avatar } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { PostCard } from '@/features/post/post-card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { useFollow, useUnfollow } from '@/hooks/follow/use-follow'
-import {
-  Calendar,
-  Link as LinkIcon,
-  MapPin,
-  ChevronLeft,
-} from 'lucide-react'
-import { useNavigate } from '@tanstack/react-router'
+import { PostCard } from '@/features/post/post-card'
+import { FollowButton } from '@/features/profile/follow-button'
+import { BadgeCheck, Calendar, MapPin, Link as LinkIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import { id } from 'date-fns/locale'
+import { id as idLocale } from 'date-fns/locale'
+import type { User } from '@/types/api'
+
+const COVER = 'linear-gradient(120deg,#3b2a6b,#5b3b9e 55%,#8b5cf6)'
+
+const TABS = [
+  { key: 'posts', label: 'Thread' },
+  { key: 'replies', label: 'Balasan' },
+  { key: 'media', label: 'Media' },
+  { key: 'likes', label: 'Suka' },
+] as const
+
+function fmt(n: number) {
+  if (n < 1000) return String(n)
+  return `${(Math.round((n / 1000) * 10) / 10).toString().replace('.', ',')}K`
+}
 
 export function ProfilePage() {
   const { username } = useParams({ from: '/_layout/profile/$username' })
   const { data: user, isLoading } = useUser(username)
   const currentUser = useAuthStore((s) => s.user)
-  const follow = useFollow()
-  const unfollow = useUnfollow()
   const navigate = useNavigate()
-
-  const isOwnProfile = currentUser?.username === username
-
-  const handleFollow = () => {
-    if (!user) return
-    if (user.isFollowing) {
-      unfollow.mutate(user.id)
-    } else {
-      follow.mutate(user.id)
-    }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="p-4 space-y-4">
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-16 w-16 rounded-full -mt-8 ml-4" />
-        <div className="space-y-2 px-4">
-          <Skeleton className="h-5 w-1/3" />
-          <Skeleton className="h-4 w-1/4" />
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-        <p className="text-lg">Pengguna tidak ditemukan</p>
-        <Button variant="ghost" onClick={() => navigate({ to: '/' })} className="mt-4">
-          Kembali ke Beranda
-        </Button>
-      </div>
-    )
-  }
+  const isOwn = currentUser?.username === username
 
   return (
-    <div>
-      {/* Back button */}
-      <div className="sticky top-0 z-10 border-b border-surface-800 bg-[#0f0f0f]/80 backdrop-blur-lg">
-        <div className="flex items-center gap-4 px-4 py-3">
-          <button
-            onClick={() => navigate({ to: '/' })}
-            className="rounded-full p-1 text-white hover:bg-surface-800 transition-colors"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-lg font-bold text-white">
-              {user.displayName}
-            </h1>
-            <p className="text-xs text-gray-500">
-              {user.postCount} kiriman
-            </p>
-          </div>
+    <div className="mx-auto w-full max-w-[640px] px-4 pb-24 pt-4 lg:px-7 lg:pb-16 lg:pt-7">
+      {isLoading || !user ? (
+        <div className="space-y-4">
+          <Skeleton className="h-[130px] w-full rounded-[20px]" />
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-4 w-1/2" />
         </div>
-      </div>
-
-      {/* Banner */}
-      <div className="h-32 bg-surface-800">
-        {user.bannerUrl && (
-          <img
-            src={user.bannerUrl}
-            alt=""
-            className="h-full w-full object-cover"
+      ) : (
+        <>
+          <ProfileHeader
+            user={user}
+            isOwn={isOwn}
+            onEdit={() => navigate({ to: '/settings' })}
           />
-        )}
-      </div>
+          <ProfileTabs username={username} />
+        </>
+      )}
+    </div>
+  )
+}
 
-      {/* Profile info */}
-      <div className="px-4 pb-3">
-        <div className="flex items-end justify-between -mt-8 mb-3">
+function ProfileHeader({
+  user,
+  isOwn,
+  onEdit,
+}: {
+  user: User
+  isOwn: boolean
+  onEdit: () => void
+}) {
+  return (
+    <div className="mb-[18px] overflow-hidden rounded-[20px] border border-line">
+      <div className="h-[130px]" style={{ backgroundImage: user.bannerUrl ? undefined : COVER }}>
+        {user.bannerUrl && <img src={user.bannerUrl} alt="" className="h-full w-full object-cover" />}
+      </div>
+      <div className="bg-card px-[22px] pb-5">
+        <div className="-mt-10 flex items-end justify-between">
           <Avatar
             src={user.avatarUrl}
             alt={user.displayName}
-            size="xl"
-            className="border-4 border-[#0f0f0f]"
+            seed={user.username}
+            size="2xl"
+            className="border-4 border-card"
           />
-          {!isOwnProfile && (
-            <Button
-              variant={user.isFollowing ? 'secondary' : 'primary'}
-              size="sm"
-              onClick={handleFollow}
-              loading={follow.isPending || unfollow.isPending}
+          {isOwn ? (
+            <button
+              onClick={onEdit}
+              className="rounded-xl border border-line-strong px-5 py-2.5 text-[14px] font-bold text-ink transition hover:bg-white/[0.05]"
             >
-              {user.isFollowing ? 'Mengikuti' : 'Ikuti'}
-            </Button>
+              Edit profil
+            </button>
+          ) : (
+            <FollowButton user={user} />
           )}
         </div>
 
-        <h1 className="flex items-center gap-2 text-xl font-bold text-white">
-          {user.displayName}
-          {user.isVerified && (
-            <Badge variant="brand" className="h-5 px-1 text-xs">
-              ✓
-            </Badge>
-          )}
-        </h1>
-        <p className="text-sm text-gray-500">@{user.username}</p>
+        <div className="mt-3.5 flex items-center gap-1.5">
+          <span className="text-[22px] font-extrabold tracking-[-0.4px]">{user.displayName}</span>
+          {user.isVerified && <BadgeCheck className="h-[19px] w-[19px] fill-brand-500 text-card" />}
+        </div>
+        <div className="text-[14.5px] text-muted">@{user.username}</div>
 
         {user.bio && (
-          <p className="mt-2 text-sm text-gray-300 whitespace-pre-wrap">
+          <div className="mt-3 max-w-[520px] whitespace-pre-wrap text-[14.5px] leading-relaxed text-ink-soft">
             {user.bio}
-          </p>
+          </div>
         )}
 
-        <div className="mt-2 flex flex-wrap gap-3 text-sm text-gray-500">
+        <div className="mt-3.5 flex flex-wrap items-center gap-4 text-[13.5px] text-muted-4">
           {user.location && (
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5" />
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-[15px] w-[15px]" strokeWidth={2} />
               {user.location}
             </span>
           )}
@@ -143,107 +113,87 @@ export function ProfilePage() {
               href={user.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-brand-400 hover:underline"
+              className="flex items-center gap-1.5 text-violet-soft hover:underline"
             >
-              <LinkIcon className="h-3.5 w-3.5" />
+              <LinkIcon className="h-[15px] w-[15px]" strokeWidth={2} />
               {user.website.replace(/^https?:\/\//, '')}
             </a>
           )}
-          <span className="flex items-center gap-1">
-            <Calendar className="h-3.5 w-3.5" />
-            Bergabung{' '}
-            {format(new Date(user.createdAt), 'MMMM yyyy', { locale: id })}
+          <span className="flex items-center gap-1.5">
+            <Calendar className="h-[15px] w-[15px]" strokeWidth={2} />
+            Bergabung {format(new Date(user.createdAt), 'MMMM yyyy', { locale: idLocale })}
           </span>
         </div>
 
-        <div className="mt-3 flex gap-4 text-sm">
-          <span className="text-gray-500">
-            <span className="font-semibold text-white">
-              {user.followingCount}
-            </span>{' '}
+        <div className="mt-4 flex gap-[22px] text-[14.5px] text-muted-4">
+          <span>
+            <strong className="text-[15.5px] text-ink-bright">{fmt(user.followingCount)}</strong>{' '}
             Mengikuti
           </span>
-          <span className="text-gray-500">
-            <span className="font-semibold text-white">
-              {user.followerCount}
-            </span>{' '}
+          <span>
+            <strong className="text-[15.5px] text-ink-bright">{fmt(user.followerCount)}</strong>{' '}
             Pengikut
+          </span>
+          <span>
+            <strong className="text-[15.5px] text-ink-bright">{fmt(user.postCount)}</strong> Thread
           </span>
         </div>
       </div>
-
-      {/* Tabs */}
-      <ProfileTabs username={username} />
     </div>
   )
 }
 
 function ProfileTabs({ username }: { username: string }) {
-  const { data: posts, isLoading: postsLoading } = useUserPosts(username, 'posts')
+  const [tab, setTab] = useState<string>('posts')
+  const { data, isLoading } = useUserPosts(username, tab)
+  const posts = data?.pages.flatMap((p) => p.data) ?? []
 
   return (
-    <div className="border-t border-surface-800">
-      <Tabs defaultValue="posts">
-        <TabsList className="w-full rounded-none bg-transparent p-0">
-          {['posts', 'replies', 'likes', 'media'].map((tab) => (
-            <TabsTrigger
-              key={tab}
-              value={tab}
-              className="flex-1 rounded-none border-b-2 border-transparent py-3 data-[state=active]:border-brand-500 data-[state=active]:bg-transparent"
+    <>
+      <div className="mb-4 flex overflow-hidden rounded-[16px] border border-line bg-card">
+        {TABS.map((t) => {
+          const active = tab === t.key
+          return (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`flex-1 border-b-[2.5px] py-4 text-[15px] transition ${
+                active
+                  ? 'border-brand-500 font-bold text-ink-bright'
+                  : 'border-transparent font-semibold text-muted'
+              }`}
             >
-              {tab === 'posts'
-                ? 'Kiriman'
-                : tab === 'replies'
-                  ? 'Balasan'
-                  : tab === 'likes'
-                    ? 'Suka'
-                    : 'Media'}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
 
-        <TabsContent value="posts">
-          {postsLoading ? (
-            <div className="divide-y divide-surface-800">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex gap-3 px-4 py-3">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-1/3" />
-                    <Skeleton className="h-4 w-full" />
-                  </div>
+      {isLoading ? (
+        <div className="flex flex-col gap-3.5">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="rounded-[18px] border border-line bg-card p-5">
+              <div className="flex gap-3">
+                <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-4 w-full" />
                 </div>
-              ))}
+              </div>
             </div>
-          ) : (
-            <div className="divide-y divide-surface-800">
-              {posts?.pages
-                .flatMap((p) => p.data)
-                .map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="replies">
-          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-            <p className="text-sm">Belum ada balasan</p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="likes">
-          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-            <p className="text-sm">Belum ada suka</p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="media">
-          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-            <p className="text-sm">Belum ada media</p>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+          ))}
+        </div>
+      ) : posts.length === 0 ? (
+        <div className="rounded-[18px] border border-line bg-card py-14 text-center text-muted">
+          Belum ada {TABS.find((t) => t.key === tab)?.label.toLowerCase()}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3.5">
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
+    </>
   )
 }

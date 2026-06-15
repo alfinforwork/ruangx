@@ -56,10 +56,15 @@ export const api = ofetch.create({
     const d = response._data as any
     if (d && d.success && d.data !== undefined) {
       const inner = d.data
-      // Remap paginated shape {items, cursor, hasMore, limit} → {data: items, meta: {cursor, hasMore}}
-      if (inner && typeof inner === 'object' && !Array.isArray(inner) && 'items' in inner) {
+      // Remap paginated shape {items|posts, cursor, hasMore, limit} → {data, meta:{cursor, hasMore}}
+      const isPaginated =
+        inner &&
+        typeof inner === 'object' &&
+        !Array.isArray(inner) &&
+        ('items' in inner || 'posts' in inner)
+      if (isPaginated) {
         response._data = {
-          data: inner.items ?? [],
+          data: inner.items ?? inner.posts ?? [],
           meta: {
             cursor: inner.cursor ?? null,
             hasMore: inner.hasMore ?? false,

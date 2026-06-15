@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand — violet accent (matches design gradient #8b5cf6 → #6d28d9) */
   --color-brand-50: #f5f3ff;
   --color-brand-100: #ede9fe;
   --color-brand-200: #ddd6fe;
@@ -12,25 +13,69 @@
   --color-brand-800: #5b21b6;
   --color-brand-900: #4c1d95;
 
+  /* Link / soft violet used across the design */
+  --color-violet-soft: #a98bff;
+  --color-violet-soft-2: #c4b3ff;
+
+  /* Ruangx surface system (dark, slightly blue-black) */
+  --color-bg: #0a0a0f;
+  --color-card: #131318;
+  --color-input: #0e0e13;
+  --color-modal: #121218;
+  --color-popover: #18181f;
+
+  /* Lines / borders */
+  --color-line: #20202a;
+  --color-line-soft: #18181f;
+  --color-line-mid: #1c1c24;
+  --color-line-row: #1a1a22;
+  --color-line-input: #22222c;
+  --color-line-strong: #2a2a34;
+
+  /* Text */
+  --color-ink: #ededf2;
+  --color-ink-bright: #f4f4f7;
+  --color-ink-dim: #e3e3ea;
+  --color-ink-soft: #cdcdd5;
+  --color-ink-muted: #b4b4be;
+  --color-muted: #7e7e8a;
+  --color-muted-2: #a9a9b4;
+  --color-muted-3: #9a9aa4;
+  --color-muted-4: #8a8a94;
+  --color-faint: #5a5a66;
+  --color-faint-2: #6b6b75;
+  --color-faint-3: #5e5e68;
+
+  /* Accent status colors used in the design */
+  --color-like: #fb5a7e;
+  --color-repost: #2ecf8f;
+  --color-warn: #fb923c;
+  --color-gold: #f59e0b;
+
+  /* Legacy surface scale — mapped onto the ruangx dark palette so older
+     components (cards, inputs, modals) match the new design automatically. */
   --color-surface-50: #fafafa;
   --color-surface-100: #f5f5f5;
   --color-surface-200: #e5e5e5;
   --color-surface-300: #d4d4d4;
   --color-surface-400: #a3a3a3;
-  --color-surface-500: #737373;
-  --color-surface-600: #525252;
-  --color-surface-700: #404040;
-  --color-surface-800: #262626;
-  --color-surface-850: #1a1a1a;
-  --color-surface-900: #171717;
-  --color-surface-950: #0a0a0a;
+  --color-surface-500: #7e7e8a;
+  --color-surface-600: #34343f;
+  --color-surface-700: #2a2a34;
+  --color-surface-800: #20202a;
+  --color-surface-850: #18181f;
+  --color-surface-900: #131318;
+  --color-surface-950: #0a0a0f;
+
+  /* Display font */
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
   *,
   *::before,
   *::after {
-    @apply border-surface-800;
+    @apply border-line;
   }
 
   html {
@@ -38,15 +83,15 @@
   }
 
   body {
-    @apply bg-[#0f0f0f] text-gray-100;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-      'Helvetica Neue', Arial, sans-serif;
+    @apply bg-bg text-ink;
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar — matches design */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 9px;
+    height: 9px;
   }
 
   ::-webkit-scrollbar-track {
@@ -54,18 +99,17 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #404040;
-    border-radius: 3px;
+    background: #26262f;
+    border-radius: 8px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #525252;
+    background: #34343f;
   }
 
-  /* Firefox */
   * {
     scrollbar-width: thin;
-    scrollbar-color: #404040 transparent;
+    scrollbar-color: #26262f transparent;
   }
 }
 
@@ -77,4 +121,45 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Violet gradient surfaces */
+  .bg-grad-brand {
+    background-image: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  }
+  .text-grad-brand {
+    background-image: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .shadow-brand {
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.32);
+  }
+}
+
+@keyframes rxFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rxPop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rx-fade {
+  animation: rxFade 0.18s ease;
+}
+.animate-rx-pop {
+  animation: rxPop 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
 }

@@ -1,141 +1,132 @@
-import { useState } from 'react'
 import type { Post } from '@/types/api'
 import { useToggleLike } from '@/hooks/like/use-like'
 import { useToggleBookmark } from '@/hooks/bookmark/use-bookmark'
 import { useComposerStore } from '@/stores/composer'
-import { Heart, MessageCircle, Repeat2, Bookmark, Share } from 'lucide-react'
+import {
+  Heart,
+  MessageCircle,
+  Repeat2,
+  Bookmark,
+  Share,
+} from 'lucide-react'
+
+export function formatCount(n: number): string {
+  if (!n) return '0'
+  if (n < 1000) return String(n)
+  const k = n / 1000
+  return `${(Math.round(k * 10) / 10).toString().replace('.', ',')}K`
+}
 
 interface PostActionsProps {
   post: Post
-  compact?: boolean
 }
 
-export function PostActions({ post, compact = false }: PostActionsProps) {
+export function PostActions({ post }: PostActionsProps) {
   const toggleLike = useToggleLike()
   const toggleBookmark = useToggleBookmark()
   const openComposer = useComposerStore((s) => s.open)
 
-  const handleReply = () => {
+  const stop = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleReply = (e: React.MouseEvent) => {
+    stop(e)
     openComposer({ postId: post.id, username: post.author.username })
   }
-
   const handleLike = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    stop(e)
     toggleLike.mutate(post.id)
   }
-
   const handleBookmark = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    stop(e)
     toggleBookmark.mutate(post.id)
   }
-
   const handleShare = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    stop(e)
+    const url = `${window.location.origin}/post/${post.id}`
     if (navigator.share) {
-      await navigator.share({
-        title: 'ruangx',
-        text: post.content,
-        url: `${window.location.origin}/post/${post.id}`,
-      })
+      await navigator.share({ title: 'ruangx', text: post.content, url })
     } else {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/post/${post.id}`,
-      )
+      await navigator.clipboard.writeText(url)
     }
   }
 
-  const iconClass = compact ? 'h-4 w-4' : 'h-5 w-5'
-  const textClass = compact ? 'text-xs' : 'text-sm'
-
   return (
-    <div
-      className={`flex items-center ${
-        compact ? 'gap-3' : 'gap-6'
-      } text-gray-500`}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* Reply */}
-      <button
+    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+      <ActionButton
         onClick={handleReply}
-        className="flex items-center gap-1.5 transition-colors hover:text-brand-400 group"
-      >
-        <div className="rounded-full p-1.5 transition-colors group-hover:bg-brand-600/20">
-          <MessageCircle className={iconClass} />
-        </div>
-        {post.replyCount > 0 && (
-          <span className={textClass}>{post.replyCount}</span>
-        )}
-      </button>
-
-      {/* Repost */}
-      <button className="flex items-center gap-1.5 transition-colors hover:text-green-400 group">
-        <div className="rounded-full p-1.5 transition-colors group-hover:bg-green-600/20">
-          <Repeat2 className={iconClass} />
-        </div>
-        {post.repostCount > 0 && (
-          <span className={textClass}>{post.repostCount}</span>
-        )}
-      </button>
-
-      {/* Like */}
-      <button
+        icon={<MessageCircle className="h-[18px] w-[18px]" strokeWidth={1.9} />}
+        label={formatCount(post.replyCount)}
+        hover="hover:bg-brand-500/[0.12] hover:text-violet-soft"
+        color="text-muted"
+      />
+      <ActionButton
+        onClick={stop}
+        icon={<Repeat2 className="h-[18px] w-[18px]" strokeWidth={1.9} />}
+        label={formatCount(post.repostCount)}
+        hover="hover:bg-[#2ecf8f]/[0.12]"
+        color={post.isReposted ? 'text-[#2ecf8f]' : 'text-muted'}
+      />
+      <ActionButton
         onClick={handleLike}
-        className={`flex items-center gap-1.5 transition-colors group ${
-          post.isLiked ? 'text-red-400' : 'hover:text-red-400'
-        }`}
-      >
-        <div
-          className={`rounded-full p-1.5 transition-colors ${
-            post.isLiked
-              ? 'bg-red-600/20'
-              : 'group-hover:bg-red-600/20'
-          }`}
-        >
+        icon={
           <Heart
-            className={`${iconClass} ${
-              post.isLiked ? 'fill-red-400' : ''
-            }`}
+            className="h-[18px] w-[18px]"
+            strokeWidth={1.9}
+            fill={post.isLiked ? 'currentColor' : 'none'}
           />
-        </div>
-        {post.likeCount > 0 && (
-          <span className={textClass}>{post.likeCount}</span>
-        )}
-      </button>
+        }
+        label={formatCount(post.likeCount)}
+        hover="hover:bg-[#fb5a7e]/[0.12]"
+        color={post.isLiked ? 'text-[#fb5a7e]' : 'text-muted'}
+      />
 
-      {/* Bookmark */}
-      <button
+      <div className="flex-1" />
+
+      <ActionButton
         onClick={handleBookmark}
-        className={`flex items-center gap-1.5 transition-colors group ${
-          post.isBookmarked ? 'text-brand-400' : 'hover:text-brand-400'
-        }`}
-      >
-        <div
-          className={`rounded-full p-1.5 transition-colors ${
-            post.isBookmarked
-              ? 'bg-brand-600/20'
-              : 'group-hover:bg-brand-600/20'
-          }`}
-        >
+        icon={
           <Bookmark
-            className={`${iconClass} ${
-              post.isBookmarked ? 'fill-brand-400' : ''
-            }`}
+            className="h-[18px] w-[18px]"
+            strokeWidth={1.9}
+            fill={post.isBookmarked ? 'currentColor' : 'none'}
           />
-        </div>
-      </button>
-
-      {/* Share */}
-      <button
+        }
+        hover="hover:bg-brand-500/[0.12]"
+        color={post.isBookmarked ? 'text-brand-500' : 'text-muted'}
+      />
+      <ActionButton
         onClick={handleShare}
-        className="flex items-center gap-1.5 transition-colors hover:text-brand-400 group"
-      >
-        <div className="rounded-full p-1.5 transition-colors group-hover:bg-brand-600/20">
-          <Share className={iconClass} />
-        </div>
-      </button>
+        icon={<Share className="h-[18px] w-[18px]" strokeWidth={1.9} />}
+        hover="hover:bg-brand-500/[0.12] hover:text-violet-soft"
+        color="text-muted"
+      />
     </div>
+  )
+}
+
+function ActionButton({
+  onClick,
+  icon,
+  label,
+  hover,
+  color,
+}: {
+  onClick: (e: React.MouseEvent) => void
+  icon: React.ReactNode
+  label?: string
+  hover: string
+  color: string
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-[7px] rounded-[9px] px-[9px] py-1.5 text-[13.5px] transition-all ${color} ${hover}`}
+    >
+      {icon}
+      {label !== undefined && <span>{label}</span>}
+    </button>
   )
 }

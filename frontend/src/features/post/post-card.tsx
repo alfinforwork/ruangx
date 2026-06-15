@@ -1,101 +1,112 @@
-import { Link } from '@tanstack/react-router'
-import { formatDistanceToNow } from 'date-fns'
-import { id } from 'date-fns/locale'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import type { Post } from '@/types/api'
+import { timeAgo } from '@/libs/utils/time'
 import { PostMedia } from './post-media'
 import { PostActions } from './post-actions'
+import { BadgeCheck, MoreHorizontal } from 'lucide-react'
 
 interface PostCardProps {
   post: Post
+  /** Render flat inside a divided container instead of a standalone card. */
+  flush?: boolean
+  /** Show a connecting thread line below the avatar (reply chains). */
   showThreadLine?: boolean
 }
 
-export function PostCard({ post, showThreadLine }: PostCardProps) {
-  const timeAgo = formatDistanceToNow(new Date(post.createdAt), {
-    addSuffix: true,
-    locale: id,
-  })
+export function PostCard({ post, flush, showThreadLine }: PostCardProps) {
+  const navigate = useNavigate()
+  const open = () => navigate({ to: '/post/$id', params: { id: post.id } })
 
   return (
-    <div className="group border-b border-surface-800 px-4 py-3 transition-colors hover:bg-surface-900/50">
-      <div className="flex gap-3">
-        {/* Thread line + avatar */}
+    <article
+      onClick={open}
+      className={`cursor-pointer font-display text-ink transition-colors ${
+        flush
+          ? 'border-b border-line-soft px-5 py-4 hover:bg-white/[0.02]'
+          : 'rounded-[18px] border border-line bg-card p-[18px_20px] hover:border-line-strong'
+      }`}
+    >
+      {/* Header */}
+      <header className="flex items-start gap-3">
         <div className="flex flex-col items-center">
-          <Link to="/profile/$username" params={{ username: post.author.username }}>
+          <Link
+            to="/profile/$username"
+            params={{ username: post.author.username }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <Avatar
               src={post.author.avatarUrl}
               alt={post.author.displayName}
-              size="md"
+              seed={post.author.username}
+              className="h-11 w-11"
             />
           </Link>
-          {showThreadLine && (
-            <div className="mt-1 w-px flex-1 bg-surface-700" />
-          )}
+          {showThreadLine && <div className="mt-1 w-0.5 flex-1 rounded bg-brand-500/30" />}
         </div>
 
-        {/* Content */}
         <div className="min-w-0 flex-1">
-          {/* Header */}
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex flex-wrap items-center gap-1.5">
             <Link
-              to="/profile/$username" params={{ username: post.author.username }}
-              className="flex items-center gap-1"
+              to="/profile/$username"
+              params={{ username: post.author.username }}
+              onClick={(e) => e.stopPropagation()}
+              className="text-[15px] font-bold text-ink-bright hover:underline"
             >
-              <span className="font-semibold text-white hover:underline">
-                {post.author.displayName}
-              </span>
-              {post.author.isVerified && (
-                <Badge variant="brand" className="h-4 px-1 text-[10px]">
-                  ✓
-                </Badge>
-              )}
+              {post.author.displayName}
             </Link>
-            <span className="text-gray-500">
-              @{post.author.username}
-            </span>
-            <span className="text-gray-500">·</span>
-            <Link to="/post/$id" params={{ id: post.id }} className="text-gray-500 hover:underline">
-              {timeAgo}
-            </Link>
-          </div>
-
-          {/* Content text */}
-          <Link to="/post/$id" params={{ id: post.id }} className="block">
-            <div className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-gray-100">
-              {post.content}
-            </div>
-          </Link>
-
-          {/* Hashtags */}
-          {post.hashtags.length > 0 && (
-            <div className="mt-1 flex flex-wrap gap-1">
-              {post.hashtags.map((tag) => (
-                <Link
-                  key={tag}
-                  to="/hashtag/$tag" params={{ tag }}
-                  className="text-sm text-brand-400 hover:underline"
-                >
-                  #{tag}
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* Media */}
-          {post.media.length > 0 && (
-            <div className="mt-2">
-              <PostMedia media={post.media} />
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="mt-2">
-            <PostActions post={post} compact />
+            {post.author.isVerified && (
+              <BadgeCheck className="h-4 w-4 fill-brand-500 text-card" />
+            )}
+            <span className="text-[14px] text-muted">@{post.author.username}</span>
+            <span className="text-[14px] text-faint-3">·</span>
+            <span className="text-[14px] text-muted">{timeAgo(post.createdAt)}</span>
           </div>
         </div>
+
+        <button
+          onClick={(e) => e.stopPropagation()}
+          className="rounded-lg p-1 leading-none text-faint-2 transition-colors hover:bg-white/[0.06] hover:text-[#c9c9d2]"
+        >
+          <MoreHorizontal className="h-5 w-5" />
+        </button>
+      </header>
+
+      {/* Body */}
+      {post.content && (
+        <div className="ml-14 mb-1 mt-2.5 whitespace-pre-wrap text-[15.5px] leading-relaxed text-ink-dim">
+          {post.content}
+        </div>
+      )}
+
+      {/* Hashtags */}
+      {post.hashtags.length > 0 && (
+        <div className="ml-14 mt-1 flex flex-wrap gap-1.5">
+          {post.hashtags.map((tag) => (
+            <Link
+              key={tag}
+              to="/hashtag/$tag"
+              params={{ tag }}
+              onClick={(e) => e.stopPropagation()}
+              className="text-sm font-medium text-violet-soft hover:underline"
+            >
+              #{tag}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Media */}
+      {post.media.length > 0 && (
+        <div className="ml-14 mt-2.5">
+          <PostMedia media={post.media} />
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="ml-14 mt-3">
+        <PostActions post={post} />
       </div>
-    </div>
+    </article>
   )
 }

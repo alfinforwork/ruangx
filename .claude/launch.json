@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "ruangx-web", "runtimeExecutable": "bash", "runtimeArgs": ["-lc", "cd frontend && npx vite --port 3000"], "port": 3000 }
+  ]
+}

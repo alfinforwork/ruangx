@@ -15,9 +15,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/alfinokio/ruangx/config"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/golang-migrate/migrate/v4"
 	authHandler "github.com/alfinokio/ruangx/internal/handler/auth"
 	bookmarkHandler "github.com/alfinokio/ruangx/internal/handler/bookmark"
 	followHandler "github.com/alfinokio/ruangx/internal/handler/follow"
@@ -52,6 +49,9 @@ import (
 	uploadUC "github.com/alfinokio/ruangx/internal/usecase/upload"
 	userUC "github.com/alfinokio/ruangx/internal/usecase/user"
 	"github.com/alfinokio/ruangx/pkg/response"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func init() {
@@ -201,8 +201,6 @@ func main() {
 	})
 
 	authMw := middleware.Auth(jwtSvc)
-
-	
 
 	setupRoutes(app, authMw, authH, postH, userH, likeH, bookmarkH, followH, roomH, hashtagH, notifH, msgH, trendH, uploadH, timelineH)
 

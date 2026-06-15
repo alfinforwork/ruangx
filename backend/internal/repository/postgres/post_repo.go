@@ -120,7 +120,7 @@ func (r *PostRepository) FindByUser(ctx context.Context, userID string, cursor s
 			u.id, u.username, u.display_name, u.avatar_url, u.is_verified
 		FROM posts p
 		JOIN users u ON u.id = p.user_id
-		WHERE p.user_id = $1 AND p.is_deleted = false`
+		WHERE (u.username = $1 OR p.user_id::text = $1) AND p.is_deleted = false AND p.parent_id IS NULL`
 
 	args := []interface{}{userID}
 	argIdx := 2

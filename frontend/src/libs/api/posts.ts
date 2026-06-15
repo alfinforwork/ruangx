@@ -1,25 +1,35 @@
-import type { Post, CreatePostRequest, PaginatedResponse, CursorResponse, PostListParams } from '@/types/api'
+import type { Post, CreatePostRequest, CursorResponse, PostListParams } from '@/types/api'
 import { api } from './client'
+import { normalizePost, normalizePostPage } from './normalize'
 
 export const postsApi = {
-  list: (params?: PostListParams) =>
-    api<CursorResponse<Post>>('/posts', { params }),
+  list: async (params?: PostListParams) =>
+    normalizePostPage(await api<CursorResponse<Post>>('/posts', { params })),
 
-  get: (id: string) =>
-    api<Post>(`/posts/${id}`),
+  get: async (id: string) => normalizePost(await api<Post>(`/posts/${id}`)),
 
-  create: (data: CreatePostRequest) =>
-    api<Post>('/posts', { method: 'POST', body: data }),
+  create: async (data: CreatePostRequest) =>
+    normalizePost(await api<Post>('/posts', { method: 'POST', body: data })),
 
-  delete: (id: string) =>
-    api<void>(`/posts/${id}`, { method: 'DELETE' }),
+  delete: (id: string) => api<void>(`/posts/${id}`, { method: 'DELETE' }),
 
-  getThread: (id: string) =>
-    api<{ post: Post; ancestors: Post[]; descendants: Post[] }>(`/posts/${id}/thread`),
+  getThread: async (id: string) => {
+    const res = await api<{ post: any; ancestors: any[]; descendants: any[] }>(
+      `/posts/${id}/thread`,
+    )
+    return {
+      post: normalizePost(res.post),
+      ancestors: (res.ancestors ?? []).map(normalizePost),
+      descendants: (res.descendants ?? []).map(normalizePost),
+    }
+  },
 
-  getFeed: (type?: string, cursor?: string) =>
-    api<CursorResponse<Post>>('/feed', { params: { type, cursor } }),
+  getFeed: async (type?: string, cursor?: string) =>
+    normalizePostPage(await api<CursorResponse<Post>>('/feed', { params: { type, cursor } })),
 
-  getByUser: (userId: string, type?: string, cursor?: string) =>
-    api<CursorResponse<Post>>(`/users/${userId}/posts`, { params: { type, cursor } }),
+  // Backend keys user posts by username.
+  getByUser: async (username: string, type?: string, cursor?: string) =>
+    normalizePostPage(
+      await api<CursorResponse<Post>>(`/users/${username}/posts`, { params: { type, cursor } }),
+    ),
 }

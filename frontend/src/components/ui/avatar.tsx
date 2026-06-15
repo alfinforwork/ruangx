@@ -1,25 +1,38 @@
 import * as AvatarPrimitive from '@radix-ui/react-avatar'
 import { cn } from '@/libs/utils/cn'
+import { gradientFor, initialsFor } from '@/libs/utils/gradient'
 import type { ComponentProps } from 'react'
 
 interface AvatarProps extends ComponentProps<typeof AvatarPrimitive.Root> {
   src?: string | null
   alt?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  /** Stable seed for the gradient fallback (defaults to alt). */
+  seed?: string
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
 }
 
 const sizeMap = {
-  sm: 'h-8 w-8 text-xs',
-  md: 'h-10 w-10 text-sm',
-  lg: 'h-12 w-12 text-base',
-  xl: 'h-16 w-16 text-lg',
+  xs: 'h-8 w-8 text-[11px]',
+  sm: 'h-9 w-9 text-xs',
+  md: 'h-[42px] w-[42px] text-sm',
+  lg: 'h-[46px] w-[46px] text-[15px]',
+  xl: 'h-[72px] w-[72px] text-2xl',
+  '2xl': 'h-[92px] w-[92px] text-3xl',
 }
 
-export function Avatar({ src, alt = '', size = 'md', className, ...props }: AvatarProps) {
+export function Avatar({
+  src,
+  alt = '',
+  seed,
+  size = 'md',
+  className,
+  ...props
+}: AvatarProps) {
+  const gradient = gradientFor(seed ?? alt)
   return (
     <AvatarPrimitive.Root
       className={cn(
-        'relative inline-flex shrink-0 overflow-hidden rounded-full',
+        'relative inline-flex shrink-0 select-none overflow-hidden rounded-full',
         sizeMap[size],
         className,
       )}
@@ -30,8 +43,11 @@ export function Avatar({ src, alt = '', size = 'md', className, ...props }: Avat
         alt={alt}
         className="aspect-square h-full w-full object-cover"
       />
-      <AvatarPrimitive.Fallback className="flex h-full w-full items-center justify-center bg-brand-700 text-white font-medium">
-        {alt?.[0]?.toUpperCase() ?? '?'}
+      <AvatarPrimitive.Fallback
+        className="flex h-full w-full items-center justify-center font-bold tracking-wide text-white"
+        style={{ backgroundImage: gradient }}
+      >
+        {initialsFor(alt)}
       </AvatarPrimitive.Fallback>
     </AvatarPrimitive.Root>
   )

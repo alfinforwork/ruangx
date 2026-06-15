@@ -1,135 +1,95 @@
-import { Link, useLocation } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/auth'
-import { useNotificationStore } from '@/stores/notification'
 import { Avatar } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { useLogout } from '@/hooks/auth/use-auth'
 import { useComposerStore } from '@/stores/composer'
-import {
-  Home,
-  Search,
-  Bell,
-  Mail,
-  User as UserIcon,
-  Hash,
-  HashIcon,
-  MessagesSquare,
-  Settings,
-  LogOut,
-  Feather,
-  MoreHorizontal,
-} from 'lucide-react'
+import { useNavItems, type NavItem } from '@/features/layout/nav'
+import { BadgeCheck, MoreVertical, Plus } from 'lucide-react'
 
-interface NavItemProps {
-  href: string
-  icon: React.ReactNode
-  label: string
-  badge?: number
-  isActive: boolean
-}
-
-function NavItem({ href, icon, label, badge, isActive }: NavItemProps) {
+export function NavButton({ item }: { item: NavItem }) {
+  const Icon = item.icon
   return (
     <Link
-      to={href}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-base transition-colors ${
-        isActive
-          ? 'text-white font-semibold bg-surface-800'
-          : 'text-gray-400 hover:text-white hover:bg-surface-800/60'
+      to={item.to}
+      params={item.params as never}
+      className={`flex w-full items-center gap-[14px] rounded-[13px] px-[14px] py-[13px] transition-colors ${
+        item.active
+          ? 'border border-brand-500/25 bg-gradient-to-br from-brand-500/[0.22] to-brand-600/[0.08] text-white'
+          : 'border border-transparent text-muted-2 hover:bg-white/[0.045]'
       }`}
     >
-      <span className="relative">
-        {icon}
-        {badge !== undefined && badge > 0 && (
-          <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">
-            {badge > 99 ? '99+' : badge}
-          </span>
-        )}
+      <span className="relative leading-none">
+        <Icon
+          className={`h-[22px] w-[22px] ${item.active ? 'text-violet-soft-2' : 'text-[#8a8a96]'}`}
+          strokeWidth={1.9}
+        />
       </span>
-      <span className="hidden lg:inline">{label}</span>
+      <span className={`flex-1 text-[16px] ${item.active ? 'font-bold' : 'font-semibold'}`}>
+        {item.label}
+      </span>
+      {item.badge !== undefined && item.badge > 0 && (
+        <span className="flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-grad-brand px-1.5 text-xs font-bold text-white">
+          {item.badge > 99 ? '99+' : item.badge}
+        </span>
+      )}
     </Link>
   )
 }
 
-export function LayoutSidebar({ user: _user }: { user?: import('@/types/api').User | null } = {}) {
+export function LayoutSidebar({
+  user: _user,
+}: { user?: import('@/types/api').User | null } = {}) {
   const authUser = useAuthStore((s) => s.user)
   const user = _user ?? authUser
-  const location = useLocation()
-  const unreadCount = useNotificationStore((s) => s.unreadCount)
   const openComposer = useComposerStore((s) => s.open)
-  const logout = useLogout()
-
-  const navItems = [
-    { href: '/', icon: <Home className="h-5 w-5" />, label: 'Beranda' },
-    { href: '/explore', icon: <Search className="h-5 w-5" />, label: 'Jelajahi' },
-    { href: '/notifications', icon: <Bell className="h-5 w-5" />, label: 'Notifikasi', badge: unreadCount },
-    { href: '/messages', icon: <Mail className="h-5 w-5" />, label: 'Pesan' },
-    { href: '/rooms', icon: <MessagesSquare className="h-5 w-5" />, label: 'Ruang' },
-    { href: '/settings', icon: <Settings className="h-5 w-5" />, label: 'Pengaturan' },
-  ]
-
-  const pathname = location.pathname
+  const navItems = useNavItems()
 
   return (
-    <div className="flex h-full flex-col px-3 py-4">
+    <>
       {/* Logo */}
-      <div className="mb-6 flex items-center gap-2 px-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600">
-          <span className="text-lg font-bold text-white">r</span>
-        </div>
-        <span className="hidden text-xl font-bold text-white lg:inline">
-          ruangx
-        </span>
+      <div className="flex items-center px-3 pb-[26px] text-[30px] font-extrabold tracking-[-1px]">
+        ruang<span className="text-grad-brand">x</span>
       </div>
 
-      {/* Nav links */}
-      <nav className="flex-1 space-y-1">
+      {/* Nav */}
+      <nav className="flex flex-col gap-[5px]">
         {navItems.map((item) => (
-          <NavItem
-            key={item.href}
-            {...item}
-            isActive={
-              item.href === '/'
-                ? pathname === '/'
-                : pathname.startsWith(item.href)
-            }
-          />
+          <NavButton key={item.key} item={item} />
         ))}
       </nav>
 
-      {/* Post button */}
-      <Button
+      {/* Compose CTA */}
+      <button
         onClick={() => openComposer()}
-        className="mb-4 w-full"
-        size="lg"
+        className="mt-[22px] flex items-center justify-center gap-[9px] rounded-[14px] bg-grad-brand p-[15px] text-[16px] font-bold text-white shadow-brand transition hover:brightness-110"
       >
-        <Feather className="h-5 w-5 lg:hidden" />
-        <span className="hidden lg:inline">Kirim</span>
-      </Button>
+        <Plus className="h-5 w-5" strokeWidth={2.2} />
+        Buat Thread
+      </button>
 
-      {/* User menu */}
+      <div className="flex-1" />
+
+      {/* Profile footer */}
       {user && (
-        <div className="rounded-xl p-2 hover:bg-surface-800 transition-colors">
-          <Link to="/profile/$username" params={{ username: user.username }} className="flex items-center gap-3">
-            <Avatar src={user.avatarUrl} alt={user.displayName} size="sm" />
-            <div className="hidden min-w-0 flex-1 lg:block">
-              <p className="truncate text-sm font-medium text-white">
+        <Link
+          to="/profile/$username"
+          params={{ username: user.username }}
+          className="flex items-center gap-3 rounded-[14px] border border-transparent p-[10px_12px] transition-colors hover:border-line hover:bg-white/[0.045]"
+        >
+          <Avatar src={user.avatarUrl} alt={user.displayName} seed={user.username} size="md" />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1">
+              <span className="truncate text-[15px] font-bold text-ink-bright">
                 {user.displayName}
-              </p>
-              <p className="truncate text-xs text-gray-500">@{user.username}</p>
+              </span>
+              {user.isVerified && (
+                <BadgeCheck className="h-[15px] w-[15px] shrink-0 fill-brand-500 text-bg" />
+              )}
             </div>
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                logout.mutate()
-              }}
-              className="hidden rounded-full p-1 text-gray-400 hover:text-white lg:block"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          </Link>
-        </div>
+            <div className="truncate text-[13px] text-muted">@{user.username}</div>
+          </div>
+          <MoreVertical className="h-[18px] w-[18px] shrink-0 text-faint-2" />
+        </Link>
       )}
-    </div>
+    </>
   )
 }

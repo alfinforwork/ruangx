@@ -1,16 +1,24 @@
 import type { User, UpdateProfileRequest, CursorResponse } from '@/types/api'
 import { api } from './client'
+import { normalizeUser } from './normalize'
 
 export const usersApi = {
-  getProfile: (username: string) =>
-    api<User>(`/users/${username}`),
+  getProfile: async (username: string) =>
+    normalizeUser(await api<User>(`/users/${username}`)),
 
-  updateProfile: (data: UpdateProfileRequest) =>
-    api<User>('/users/me', { method: 'PUT', body: data }),
+  updateProfile: async (data: UpdateProfileRequest) =>
+    normalizeUser(await api<User>('/users/me', { method: 'PUT', body: data })),
 
-  search: (q: string, cursor?: string) =>
-    api<CursorResponse<User>>('/users/search', { params: { q, cursor } }),
+  search: async (q: string, cursor?: string) => {
+    const res = await api<CursorResponse<User>>('/users/search', { params: { q, cursor } })
+    return {
+      data: (res.data ?? []).map(normalizeUser),
+      meta: { cursor: res.meta?.cursor ?? null, hasMore: res.meta?.hasMore ?? false },
+    }
+  },
 
-  getSuggestions: () =>
-    api<User[]>('/users/suggestions'),
+  getSuggestions: async () => {
+    const res = await api<User[]>('/users/suggestions')
+    return (Array.isArray(res) ? res : []).map(normalizeUser)
+  },
 }

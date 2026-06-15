@@ -6,10 +6,9 @@ export function useFollow() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (userId: string) => followsApi.follow(userId),
-    onSuccess: (_, userId) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.details() })
-      queryClient.invalidateQueries({ queryKey: userKeys.detail('me') })
+    mutationFn: (username: string) => followsApi.follow(username),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
   })
 }
@@ -18,10 +17,9 @@ export function useUnfollow() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (userId: string) => followsApi.unfollow(userId),
-    onSuccess: (_, userId) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.details() })
-      queryClient.invalidateQueries({ queryKey: userKeys.detail('me') })
+    mutationFn: (username: string) => followsApi.unfollow(username),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
   })
 }

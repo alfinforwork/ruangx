@@ -34,3 +34,6 @@ docker-compose.override.yml
 # Cache
 .tanstack/
 .cache/
+# Redis runtime dump
+backend/dump.rdb
+dump.rdb

@@ -15,12 +15,12 @@ type Config struct {
 	DBName     string `env:"DB_NAME" envDefault:"ruangx"`
 	DBSSLMode  string `env:"DB_SSLMODE" envDefault:"disable"`
 
-	RedisURL      string `env:"REDIS_URL" envDefault:"redis://localhost:6379/0"`
 	RedisHost     string `env:"REDIS_HOST" envDefault:"localhost:6379"`
+	RedisDB       int    `env:"REDIS_DB" envDefault:"0"`
 	RedisPassword string `env:"REDIS_PASSWORD" envDefault:""`
 
-	JWTSecret       string `env:"JWT_SECRET" envDefault:"super-secret-key-change-in-production"`
-	JWTAccessExpiry string `env:"JWT_ACCESS_EXPIRY" envDefault:"15m"`
+	JWTSecret        string `env:"JWT_SECRET" envDefault:"super-secret-key-change-in-production"`
+	JWTAccessExpiry  string `env:"JWT_ACCESS_EXPIRY" envDefault:"15m"`
 	JWTRefreshExpiry string `env:"JWT_REFRESH_EXPIRY" envDefault:"168h"`
 
 	S3Endpoint  string `env:"S3_ENDPOINT" envDefault:"http://localhost:9000"`

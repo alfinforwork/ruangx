@@ -105,12 +105,7 @@ func main() {
 		log.Warn().Err(err).Msg("Migration warning (continuing anyway)")
 	}
 
-	db := 0
-	redisAddr := cfg.RedisHost
-	if redisAddr == "" {
-		redisAddr = "localhost:6379"
-	}
-	rdb, err := cache.NewRedis(ctx, redisAddr, cfg.RedisPassword, db)
+	rdb, err := cache.NewRedis(ctx, cfg.RedisHost, cfg.RedisPassword, cfg.RedisDB)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to connect to Redis")
 	}

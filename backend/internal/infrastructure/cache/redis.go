@@ -8,9 +8,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func NewRedis(ctx context.Context, addr, password string, db int) (*redis.Client, error) {
+func NewRedis(ctx context.Context, host, password string, db int) (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr,
+		Addr:     host,
 		Password: password,
 		DB:       db,
 	})
@@ -19,6 +19,6 @@ func NewRedis(ctx context.Context, addr, password string, db int) (*redis.Client
 		return nil, fmt.Errorf("failed to connect to redis: %w", err)
 	}
 
-	log.Info().Str("addr", addr).Msg("Redis connection established")
+	log.Info().Str("host", host).Msg("Redis connection established")
 	return rdb, nil
 }

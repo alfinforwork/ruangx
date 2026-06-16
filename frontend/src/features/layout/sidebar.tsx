@@ -1,9 +1,11 @@
-import { Link } from '@tanstack/react-router'
+import { useState, useRef, useEffect } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/auth'
 import { Avatar } from '@/components/ui/avatar'
 import { useComposerStore } from '@/stores/composer'
 import { useNavItems, type NavItem } from '@/features/layout/nav'
-import { BadgeCheck, MoreVertical, Plus } from 'lucide-react'
+import { useLogout } from '@/hooks/auth/use-auth'
+import { BadgeCheck, MoreVertical, Plus, User, Settings, LogOut } from 'lucide-react'
 
 export function NavButton({ item }: { item: NavItem }) {
   const Icon = item.icon
@@ -42,6 +44,21 @@ export function LayoutSidebar({
   const user = _user ?? authUser
   const openComposer = useComposerStore((s) => s.open)
   const navItems = useNavItems()
+  const navigate = useNavigate()
+  const logout = useLogout()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    function onDown(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [menuOpen])
 
   return (
     <>
@@ -68,27 +85,61 @@ export function LayoutSidebar({
 
       <div className="flex-1" />
 
-      {/* Profile footer */}
+      {/* Profile footer with popup */}
       {user && (
-        <Link
-          to="/profile/$username"
-          params={{ username: user.username }}
-          className="flex items-center gap-3 rounded-[14px] border border-transparent p-[10px_12px] transition-colors hover:border-line hover:bg-white/[0.045]"
-        >
-          <Avatar src={user.avatarUrl} alt={user.displayName} seed={user.username} size="md" />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1">
-              <span className="truncate text-[15px] font-bold text-ink-bright">
-                {user.displayName}
-              </span>
-              {user.isVerified && (
-                <BadgeCheck className="h-[15px] w-[15px] shrink-0 fill-brand-500 text-bg" />
-              )}
+        <div ref={menuRef} className="relative">
+          {/* Popup menu */}
+          {menuOpen && (
+            <div
+              className="absolute bottom-[calc(100%+10px)] left-0 right-0 z-[200] overflow-hidden rounded-2xl border border-[#28282f] bg-[#18181f] shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
+              style={{ animation: 'rxPop 0.15s ease' }}
+            >
+              <button
+                onClick={() => { setMenuOpen(false); navigate({ to: '/profile/$username', params: { username: user.username } }) }}
+                className="flex w-full items-center gap-3 px-4 py-[13px] text-left text-[14.5px] font-semibold text-ink hover:bg-white/[0.06]"
+              >
+                <User className="h-[17px] w-[17px] shrink-0" strokeWidth={1.9} />
+                Lihat Profil
+              </button>
+              <div className="mx-[14px] h-px bg-[#22222c]" />
+              <button
+                onClick={() => { setMenuOpen(false); navigate({ to: '/settings' }) }}
+                className="flex w-full items-center gap-3 px-4 py-[13px] text-left text-[14.5px] font-semibold text-ink hover:bg-white/[0.06]"
+              >
+                <Settings className="h-[17px] w-[17px] shrink-0" strokeWidth={1.9} />
+                Pengaturan
+              </button>
+              <div className="mx-[14px] h-px bg-[#22222c]" />
+              <button
+                onClick={() => { setMenuOpen(false); logout.mutate() }}
+                className="flex w-full items-center gap-3 px-4 py-[13px] text-left text-[14.5px] font-semibold text-[#fb5a7e] hover:bg-[rgba(251,90,126,0.07)]"
+              >
+                <LogOut className="h-[17px] w-[17px] shrink-0" strokeWidth={1.9} />
+                Keluar
+              </button>
             </div>
-            <div className="truncate text-[13px] text-muted">@{user.username}</div>
-          </div>
-          <MoreVertical className="h-[18px] w-[18px] shrink-0 text-faint-2" />
-        </Link>
+          )}
+
+          {/* Profile button */}
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            className="flex w-full items-center gap-3 rounded-[14px] border border-transparent p-[10px_12px] transition-colors hover:border-line hover:bg-white/[0.045]"
+          >
+            <Avatar src={user.avatarUrl} alt={user.displayName} seed={user.username} size="md" />
+            <div className="min-w-0 flex-1 text-left">
+              <div className="flex items-center gap-1">
+                <span className="truncate text-[15px] font-bold text-ink-bright">
+                  {user.displayName}
+                </span>
+                {user.isVerified && (
+                  <BadgeCheck className="h-[15px] w-[15px] shrink-0 fill-brand-500 text-bg" />
+                )}
+              </div>
+              <div className="truncate text-[13px] text-muted">@{user.username}</div>
+            </div>
+            <MoreVertical className="h-[18px] w-[18px] shrink-0 text-faint-2" />
+          </button>
+        </div>
       )}
     </>
   )

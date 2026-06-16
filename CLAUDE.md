@@ -64,3 +64,10 @@ Use TanStack Query for ALL server state. Use optimistic updates for likes/bookma
 - Foreign keys with `ON DELETE CASCADE` for user-owned data
 - Always add indexes for query patterns
 - Always provide `.down.sql` for every `.up.sql`
+
+## Dependency Rules
+
+- Never add a dependency that isn't directly imported in source code.
+- Remove unused dependencies immediately — don't leave them "for later".
+- Backend: run `go mod tidy` after adding/removing packages.
+- Frontend: use `pnpm remove` to uninstall; never leave packages in `package.json` that have no `import` in `src/`.

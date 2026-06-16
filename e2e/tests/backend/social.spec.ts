@@ -4,7 +4,7 @@ const API = 'http://localhost:8080/api/v1'
 
 async function getToken(request: any): Promise<string> {
   const login = await request.post(`${API}/auth/login`, {
-    data: { username: 'testuser', password: 'password123' },
+    data: { identifier: 'testuser', password: 'test12345' },
   })
   return (await login.json()).data.access_token
 }
@@ -144,66 +144,5 @@ test.describe('Notifications API', () => {
   test('PUT /notifications/read-all — reject without auth', async ({ request }) => {
     const res = await request.put(`${API}/notifications/read-all`)
     expect(res.status()).toBe(401)
-  })
-})
-
-test.describe('Hashtag UI — Authenticated', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/login')
-    await page.fill('input[placeholder="username@email.com"]', 'testuser')
-    await page.fill('input[placeholder="••••••••"]', 'password123')
-    await page.click('button[type="submit"]')
-    await page.waitForURL('**/')
-  })
-
-  test('hashtag page loads with tag header', async ({ page }) => {
-    await page.goto('/hashtag/testing')
-    await expect(page.getByText('#testing')).toBeVisible({ timeout: 10000 })
-  })
-
-  test('hashtag page has back button', async ({ page }) => {
-    await page.goto('/hashtag/testing')
-    await expect(page.locator('.lucide-chevron-left')).toBeVisible({ timeout: 10000 })
-  })
-})
-
-test.describe('Mobile Nav — Authenticated', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 })
-    await page.goto('/login')
-    await page.fill('input[placeholder="username@email.com"]', 'testuser')
-    await page.fill('input[placeholder="••••••••"]', 'password123')
-    await page.click('button[type="submit"]')
-    await page.waitForURL('**/')
-  })
-
-  test('mobile bottom nav is visible', async ({ page }) => {
-    await expect(page.getByText('Beranda')).toBeVisible({ timeout: 5000 })
-  })
-
-  test('floating post button visible on mobile', async ({ page }) => {
-    const floatingBtn = page.locator('button.fixed.bottom-20')
-    if (await floatingBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await expect(floatingBtn).toBeVisible()
-    }
-  })
-})
-
-test.describe('Right Panel — Authenticated', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('/login')
-    await page.fill('input[placeholder="username@email.com"]', 'testuser')
-    await page.fill('input[placeholder="••••••••"]', 'password123')
-    await page.click('button[type="submit"]')
-    await page.waitForURL('**/')
-  })
-
-  test('right panel shows trending section', async ({ page }) => {
-    await page.waitForTimeout(1000)
-    const trending = page.getByText(/Trending|Ruang Populer/)
-    if (await trending.first().isVisible({ timeout: 5000 }).catch(() => false)) {
-      await expect(trending.first()).toBeVisible()
-    }
   })
 })

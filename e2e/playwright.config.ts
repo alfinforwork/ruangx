@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
+  globalSetup: './global-setup.ts',
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -18,25 +19,37 @@ export default defineConfig({
   },
 
   projects: [
+    // ─── Backend (API) tests — request-only, run once, no multi-browser ───
     {
-      name: 'chromium',
+      name: 'backend',
+      testDir: './tests/backend',
+      use: { ...devices['Desktop Chrome'] },
+    },
+
+    // ─── Frontend (UI) tests — run across desktop + mobile browsers ───
+    {
+      name: 'frontend-chromium',
+      testDir: './tests/frontend',
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'firefox',
+      name: 'frontend-firefox',
+      testDir: './tests/frontend',
       use: { ...devices['Desktop Firefox'] },
     },
     {
-      name: 'webkit',
+      name: 'frontend-webkit',
+      testDir: './tests/frontend',
       use: { ...devices['Desktop Safari'] },
     },
-    // Mobile testing
     {
-      name: 'mobile-chrome',
+      name: 'frontend-mobile-chrome',
+      testDir: './tests/frontend',
       use: { ...devices['Pixel 5'] },
     },
     {
-      name: 'mobile-safari',
+      name: 'frontend-mobile-safari',
+      testDir: './tests/frontend',
       use: { ...devices['iPhone 13'] },
     },
   ],

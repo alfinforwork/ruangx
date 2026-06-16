@@ -4,15 +4,16 @@
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "test:auth": "playwright test tests/auth.spec.ts",
-    "test:posts": "playwright test tests/posts.spec.ts",
-    "test:feed": "playwright test tests/feed.spec.ts",
-    "test:social": "playwright test tests/social.spec.ts",
-    "test:messages": "playwright test tests/messages.spec.ts",
-    "test:rooms": "playwright test tests/rooms.spec.ts",
-    "test:users": "playwright test tests/users.spec.ts",
-    "test:api": "playwright test --grep 'API$'",
-    "test:ui": "playwright test --grep 'UI'"
+    "test:backend": "playwright test --project=backend",
+    "test:frontend": "playwright test --project=frontend-chromium",
+    "test:frontend:all": "playwright test tests/frontend",
+    "test:auth": "playwright test backend/auth.spec.ts frontend/auth.spec.ts",
+    "test:posts": "playwright test tests/backend/posts.spec.ts",
+    "test:feed": "playwright test tests/frontend/feed.spec.ts",
+    "test:social": "playwright test backend/social.spec.ts frontend/social.spec.ts",
+    "test:messages": "playwright test backend/messages.spec.ts frontend/messages.spec.ts",
+    "test:rooms": "playwright test backend/rooms.spec.ts frontend/rooms.spec.ts",
+    "test:users": "playwright test backend/users.spec.ts frontend/users.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0"

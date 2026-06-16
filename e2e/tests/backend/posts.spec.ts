@@ -4,7 +4,7 @@ const API = 'http://localhost:8080/api/v1'
 
 async function getToken(request: any): Promise<string> {
   const login = await request.post(`${API}/auth/login`, {
-    data: { username: 'testuser', password: 'password123' },
+    data: { identifier: 'testuser', password: 'test12345' },
   })
   const body = await login.json()
   return body.data.access_token
